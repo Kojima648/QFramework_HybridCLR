@@ -1,0 +1,106 @@
+ManifestFileVersion: 0
+CRC: 2526296428
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: a2af4491c73e1e25eab6b925f9e8bdc7
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 3389ad1d6c70bebc418eb521e9813a14
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 49
+  Script: {instanceID: 0}
+- Class: 64
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: ffba93b9f8ead4c8f99b5655f3e9781e, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 693a9a833ead6495ab7feaa2b27e5c13, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1caf68ecae6664cff80709333580b0ec, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: b8da1dfbbe9340629b7f38461179ca70, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 116e6e10e26d44b886cdb585931a3608, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4bb9cfc4ef69a45adb114a18a7d4f227, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 167c8e6d4e424f4d830c56bca45e2f5d, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e25d6ed3a77268d4db84bdf9758d64c1, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: a21787a1167953649b9aaea2e0dc320b, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 128
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 223
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.ArgumentCache
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentCallGroup
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentListenerMode
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.AnimationTriggers
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.Button/ButtonClickedEvent
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.ColorBlock
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.FontData
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.Navigation
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.SpriteState
+Assets:
+- Assets/Prefabs/Game.prefab
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/System.Core.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/HotFix.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/HotFix2.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/System.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/mscorlib.dll.bytes
+- Assets/Prefabs/UI.prefab
+- Assets/Prefabs/HotUpdatePrefab.prefab
+Dependencies: []
