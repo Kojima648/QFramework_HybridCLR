@@ -1,7 +1,7 @@
+using QFramework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -10,7 +10,9 @@ public class LoadDll : MonoBehaviour
 {
     void Start()
     {
-        StartCoroutine(DownLoadDlls(this.StartGame));
+        ResKit.Init();
+        //StartCoroutine(DownLoadDlls(this.StartGame));
+        StartGame();
     }
 
     private static Dictionary<string, byte[]> s_abBytes = new Dictionary<string, byte[]>();
@@ -58,11 +60,15 @@ public class LoadDll : MonoBehaviour
 
     private System.Reflection.Assembly gameAss;
 
+    // 程序集的bundle
     public static AssetBundle AssemblyAssetBundle { get; private set; }
-
+    //资源prefab的bundle
+    public static AssetBundle ABAssetBundle { get; private set; }
     private void LoadGameDll()
     {
-        AssetBundle dllAB = AssemblyAssetBundle = AssetBundle.LoadFromMemory(GetAbBytes("common"));
+        var resLoader = ResLoader.Allocate();
+        AssetBundle dllAB = AssemblyAssetBundle = resLoader.LoadSync<AssetBundle>("standalonewindows64");
+        //AssetBundle dllAB = AssemblyAssetBundle = AssetBundle.LoadFromMemory(GetAbBytes("common"));
 #if !UNITY_EDITOR
         TextAsset dllBytes1 = dllAB.LoadAsset<TextAsset>("HotFix.dll.bytes");
         System.Reflection.Assembly.Load(dllBytes1.bytes);
@@ -71,8 +77,8 @@ public class LoadDll : MonoBehaviour
 #else
         gameAss = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.GetName().Name == "HotFix2");
 #endif
-
-        GameObject testPrefab = GameObject.Instantiate(dllAB.LoadAsset<UnityEngine.GameObject>("HotUpdatePrefab.prefab"));
+        AssetBundle hPre = ABAssetBundle =  resLoader.LoadSync<AssetBundle>("Prefabs");
+        GameObject testPrefab = GameObject.Instantiate(hPre.LoadAsset<UnityEngine.GameObject>("HotUpdatePrefab.prefab"));
     }
 
     public void RunMain()

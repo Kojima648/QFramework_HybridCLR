@@ -1,0 +1,67 @@
+ManifestFileVersion: 0
+CRC: 618298708
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: imageprefabb_prefab
+      Dependencies:
+        Dependency_0: b_png
+    Info_1:
+      Name: uibasicpanel_prefab
+      Dependencies: {}
+    Info_2:
+      Name: assetobj 1_prefab
+      Dependencies: {}
+    Info_3:
+      Name: uistackpanel1_prefab
+      Dependencies: {}
+    Info_4:
+      Name: c_png
+      Dependencies: {}
+    Info_5:
+      Name: imageprefaba_prefab
+      Dependencies:
+        Dependency_0: a_png
+    Info_6:
+      Name: uipanelwithimageprefab_prefab
+      Dependencies: {}
+    Info_7:
+      Name: textureexample1_png
+      Dependencies: {}
+    Info_8:
+      Name: uimultipanel_prefab
+      Dependencies: {}
+    Info_9:
+      Name: assetobj_prefab
+      Dependencies: {}
+    Info_10:
+      Name: spriteatlas_spriteatlas
+      Dependencies: {}
+    Info_11:
+      Name: assetobj 3_prefab
+      Dependencies: {}
+    Info_12:
+      Name: b_png
+      Dependencies: {}
+    Info_13:
+      Name: imageprefabc_prefab
+      Dependencies:
+        Dependency_0: c_png
+    Info_14:
+      Name: assetobj 2_prefab
+      Dependencies: {}
+    Info_15:
+      Name: uistackpanel2_prefab
+      Dependencies: {}
+    Info_16:
+      Name: sceneres_unity
+      Dependencies: {}
+    Info_17:
+      Name: a_png
+      Dependencies: {}
+    Info_18:
+      Name: standalonewindows64
+      Dependencies: {}
+    Info_19:
+      Name: prefabs
+      Dependencies: {}

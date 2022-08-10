@@ -29,9 +29,10 @@ public class App
 
         Debug.Log("=======看到此条日志代表你成功运行了示例项目的热更新代码=======");
         // 从AB中加载game和ui
-        AssetBundle dllAB = LoadDll.AssemblyAssetBundle;
-        GameObject.Instantiate(dllAB.LoadAsset<UnityEngine.GameObject>("Game.prefab"));
-        GameObject testPrefab = GameObject.Instantiate(dllAB.LoadAsset<UnityEngine.GameObject>("UI.prefab"));
+        
+        AssetBundle dllAB = LoadDll.ABAssetBundle;
+        UnityEngine.Object.Instantiate(dllAB.LoadAsset<GameObject>("Game.prefab"));
+        UnityEngine.Object.Instantiate(dllAB.LoadAsset<GameObject>("UI.prefab"));
         return 0;
     }
 

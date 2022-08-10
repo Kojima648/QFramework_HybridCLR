@@ -2,8 +2,9 @@
     "name": "HotFix",
     "rootNamespace": "",
     "references": [
-        "GUID:44867461c7558094cab94edbb05214d9",
-        "GUID:9e97e42c28a41430880bee376c274c86"
+        "Main",
+        "QFramework.CoreKit",
+        "QFramework"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

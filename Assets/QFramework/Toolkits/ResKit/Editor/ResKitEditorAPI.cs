@@ -23,9 +23,11 @@
  * THE SOFTWARE.
  ****************************************************************************/
 
+using HybridCLR;
+using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
-
 namespace QFramework
 {
     public class ResKitEditorAPI
@@ -34,7 +36,13 @@ namespace QFramework
         {
             AssetDatabase.RemoveUnusedAssetBundleNames();
             AssetDatabase.Refresh();
+            BuildDLL();
             BuildScript.BuildAssetBundles(EditorUserBuildSettings.activeBuildTarget);
+        }
+
+        public static void BuildDLL()
+        {
+            AssetBundleBuildHelper.BuildAssetBundlesForQF(BuildConfig.GetAssetBundleTempDirByTarget(EditorUserBuildSettings.activeBuildTarget), BuildConfig.GetAssetBundleOutputDirByTarget(EditorUserBuildSettings.activeBuildTarget), EditorUserBuildSettings.activeBuildTarget);
         }
 
         public static bool SimulationMode

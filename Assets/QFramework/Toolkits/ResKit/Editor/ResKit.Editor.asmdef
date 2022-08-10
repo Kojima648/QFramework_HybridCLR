@@ -1,18 +1,21 @@
 {
     "name": "ResKit.Editor",
+    "rootNamespace": "",
     "references": [
-        "ResKit",
-        "QFramework",
-        "QFramework.CoreKit"
+        "GUID:8ed2a396aae604c5ca111525d261bb03",
+        "GUID:9e97e42c28a41430880bee376c274c86",
+        "GUID:038dff00bcd140258ec2ecc4c541bea0",
+        "GUID:0fe5ab0d45fa50c47b622d67f1733e67"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

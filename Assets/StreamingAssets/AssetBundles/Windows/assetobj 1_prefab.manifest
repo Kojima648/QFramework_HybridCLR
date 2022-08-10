@@ -1,0 +1,19 @@
+ManifestFileVersion: 0
+CRC: 3074832926
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 392434c72aa20e6929c42f1a00de6cd5
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: ae8c52309304dbced62e9359e7a02dec
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/QFramework/Toolkits/ResKit/Example/1.AsyncLoad/AssetObj 1.prefab
+Dependencies: []

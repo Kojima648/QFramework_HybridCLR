@@ -18,7 +18,7 @@ public class GameOverPanel : MonoBehaviour,IController
                .onClick.AddListener(() =>
                {
                    gameObject.SetActive(false);
-                   Debug.Log("你点击了重新开始,hot fix111");
+                   Debug.Log("你点击了重新开始");
                    this.SendCommand<StartGameCommand>();
                });
     }

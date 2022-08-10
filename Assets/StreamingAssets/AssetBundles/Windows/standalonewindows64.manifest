@@ -1,0 +1,21 @@
+ManifestFileVersion: 0
+CRC: 3747098784
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f0ea93bc2ed1b8a3a496c18555a2b30b
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/System.Core.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/HotFix.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/HotFix2.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/System.dll.bytes
+- Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64/mscorlib.dll.bytes
+Dependencies: []

@@ -86,6 +86,36 @@ namespace HybridCLR
             }
         }
 
+
+        public static void BuildAssetBundlesForQF(string tempDir, string outputDir, BuildTarget target)
+        {
+            Directory.CreateDirectory(tempDir);
+            Directory.CreateDirectory(outputDir);
+            CompileDllHelper.CompileDll(target);
+
+            string hotfixDllSrcDir = BuildConfig.GetHotFixDllsOutputDirByTarget(target);
+            foreach (var dll in BuildConfig.AllHotUpdateDllNames)
+            {
+                string dllPath = $"{hotfixDllSrcDir}/{dll}";
+                string dllBytesPath = $"{tempDir}/{dll}.bytes";
+                File.Copy(dllPath, dllBytesPath, true);
+            }
+
+            string aotDllDir = BuildConfig.GetAssembliesPostIl2CppStripDir(target);
+            foreach (var dll in BuildConfig.AOTMetaDlls)
+            {
+                string dllPath = $"{aotDllDir}/{dll}";
+                if (!File.Exists(dllPath))
+                {
+                    Debug.LogError($"ab中添加AOT补充元数据dll:{dllPath} 时发生错误,文件不存在。裁剪后的AOT dll在BuildPlayer时才能生成，因此需要你先构建一次游戏App后再打包。");
+                    continue;
+                }
+                string dllBytesPath = $"{tempDir}/{dll}.bytes";
+                File.Copy(dllPath, dllBytesPath, true);
+            }
+            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+        }
+
         public static void BuildAssetBundleByTarget(BuildTarget target)
         {
             BuildAssetBundles(BuildConfig.GetAssetBundleTempDirByTarget(target), BuildConfig.GetAssetBundleOutputDirByTarget(target), target);
