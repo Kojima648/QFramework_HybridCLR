@@ -1,7 +1,8 @@
-# QFramework_HybridCLR
-HybridCLR + QFramework 热更演示
+HybridCLR + QFramework 热更demo演示
 
-B站视频：https://www.bilibili.com/video/bv1VW4y1Y7Nh
+QFramework:https://qframework.cn/
+HybridCLR(wolong):https://focus-creative-games.github.io/hybridclr/index/
+B站演示视频：https://www.bilibili.com/video/bv1VW4y1Y7Nh
 
 视频演示了使用HybridCLR为QFramework的Example示例工程热更，对QF的打包做了一些修改，打包前先处理DLL相关的逻辑。
 
