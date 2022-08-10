@@ -11,7 +11,6 @@ public class LoadDll : MonoBehaviour
     void Start()
     {
         ResKit.Init();
-        //StartCoroutine(DownLoadDlls(this.StartGame));
         StartGame();
     }
 
@@ -20,35 +19,6 @@ public class LoadDll : MonoBehaviour
     public static byte[] GetAbBytes(string dllName)
     {
         return s_abBytes[dllName];
-    }
-
-    IEnumerator DownLoadDlls(Action onDownloadComplete)
-    {
-        var abs = new string[]
-        {
-            "common",
-        };
-        foreach (var ab in abs)
-        {
-            string dllPath = $"{Application.streamingAssetsPath}/{ab}";
-            Debug.Log($"start download ab:{ab}");
-            UnityWebRequest www = UnityWebRequest.Get(dllPath);
-            yield return www.SendWebRequest();
-
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                Debug.Log(www.error);
-            }
-            else
-            {
-                // Or retrieve results as binary data
-                byte[] abBytes = www.downloadHandler.data;
-                Debug.Log($"dll:{ab}  size:{abBytes.Length}");
-                s_abBytes[ab] = abBytes;
-            }
-        }
-
-        onDownloadComplete();
     }
 
 
@@ -63,7 +33,7 @@ public class LoadDll : MonoBehaviour
     // 程序集的bundle
     public static AssetBundle AssemblyAssetBundle { get; private set; }
     //资源prefab的bundle
-    public static AssetBundle ABAssetBundle { get; private set; }
+    public static ResLoader MyResLoader { get; private set; }
     private void LoadGameDll()
     {
         var resLoader = ResLoader.Allocate();
@@ -77,8 +47,7 @@ public class LoadDll : MonoBehaviour
 #else
         gameAss = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.GetName().Name == "HotFix2");
 #endif
-        AssetBundle hPre = ABAssetBundle =  resLoader.LoadSync<AssetBundle>("Prefabs");
-        GameObject testPrefab = GameObject.Instantiate(hPre.LoadAsset<UnityEngine.GameObject>("HotUpdatePrefab.prefab"));
+        Instantiate(resLoader.LoadSync<GameObject>("HotUpdatePrefab"));
     }
 
     public void RunMain()

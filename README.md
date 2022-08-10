@@ -5,11 +5,11 @@ B站视频：https://www.bilibili.com/video/bv1VW4y1Y7Nh
 
 视频演示了使用HybridCLR为QFramework的Example示例工程热更，对QF的打包做了一些修改，打包前先处理DLL相关的逻辑。
 
-UI和Game打入Prefabs这个AB包，热更的dll在Assets/HybridCLRBuildCache/AssetBundleSourceData/StandaloneWindows64 这个AB包，这两个都标记了文件夹
+UI和Game打入Prefabs这个AB包，热更的dll在AssetBundleSourceData/StandaloneWindows64 这个AB包，这两个都标记了文件夹
 
-编辑下运行需要选真机模式，走AB包流程，模拟模式暂时还有bug，打包后直接从StreamingAssets复制新资源替换即可。
+真机模式和模拟模式都可以体验，观察game和ui的组件，都变白那就是AB，打包后测：直接从StreamingAssets复制新资源替换即可。
 
-对于DLL的处理用了HybridCLR原有的逻辑，QF打包前，DLL的文件夹已经被处理就绪。所以只需要标记。
+对于DLL的处理用了HybridCLR原有的逻辑，ResKit打包前，DLL的文件夹已经被处理就绪。所以只需要标记。
 
 如果你拉取了工程，QFramework_HybridCLR\HybridCLRData\init_local_il2cpp_data.bat
 

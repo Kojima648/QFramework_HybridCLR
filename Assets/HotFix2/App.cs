@@ -1,3 +1,4 @@
+using QFramework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,10 +30,9 @@ public class App
 
         Debug.Log("=======看到此条日志代表你成功运行了示例项目的热更新代码=======");
         // 从AB中加载game和ui
-        
-        AssetBundle dllAB = LoadDll.ABAssetBundle;
-        UnityEngine.Object.Instantiate(dllAB.LoadAsset<GameObject>("Game.prefab"));
-        UnityEngine.Object.Instantiate(dllAB.LoadAsset<GameObject>("UI.prefab"));
+        var resLoader = ResLoader.Allocate();
+        UnityEngine.Object.Instantiate(resLoader.LoadSync<GameObject>("Game"));
+        UnityEngine.Object.Instantiate(resLoader.LoadSync<GameObject>("UI"));
         return 0;
     }
 
