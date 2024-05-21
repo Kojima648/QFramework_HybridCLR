@@ -1,7 +1,7 @@
 ﻿/****************************************************************************
- * Copyright (c) 2016 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2016 - 2023 liangxiegame UNDER MIT License
  * 
- * http://qframework.cn
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
@@ -14,24 +14,37 @@ namespace QFramework
 {
     public interface IState
     {
+        bool Condition();
         void Enter();
         void Update();
         void FixedUpdate();
+        void OnGUI();
         void Exit();
     }
-
+    
+    
     public class CustomState : IState
     {
+        private Func<bool> mOnCondition;
         private Action mOnEnter;
         private Action mOnUpdate;
         private Action mOnFixedUpdate;
+        private Action mOnGUI;
         private Action mOnExit;
+
+        public CustomState OnCondition(Func<bool> onCondition)
+        {
+            mOnCondition = onCondition;
+            return this;
+        }
+        
         public CustomState OnEnter(Action onEnter)
         {
             mOnEnter = onEnter;
             return this;
         }
 
+        
         public CustomState OnUpdate(Action onUpdate)
         {
             mOnUpdate = onUpdate;
@@ -44,12 +57,24 @@ namespace QFramework
             return this;
         }
         
+        public CustomState OnGUI(Action onGUI)
+        {
+            mOnGUI = onGUI;
+            return this;
+        }
+        
         public CustomState OnExit(Action onExit)
         {
             mOnExit = onExit;
             return this;
         }
 
+
+        public bool Condition()
+        {
+            var result = mOnCondition?.Invoke();
+            return result == null || result.Value;
+        }
 
         public void Enter()
         {
@@ -68,6 +93,12 @@ namespace QFramework
             mOnFixedUpdate?.Invoke();
         }
 
+        
+        public void OnGUI()
+        {
+            mOnGUI?.Invoke();
+        }
+
         public void Exit()
         {
             mOnExit?.Invoke();
@@ -78,43 +109,195 @@ namespace QFramework
     [APIDescriptionCN("简易状态机")]
     [APIDescriptionEN("Simple FSM")]
     [APIExampleCode(@"
-        void Example()
+using UnityEngine;
+
+namespace QFramework.Example
+{
+    public class IStateBasicUsageExample : MonoBehaviour
+    {
+        public enum States
         {
-            var fsm = new FSM<States>();
-            fsm.State(States.A)
+            A,
+            B
+        }
+
+        public FSM<States> FSM = new FSM<States>();
+
+        void Start()
+        {
+            FSM.OnStateChanged((previousState, nextState) =>
+            {
+                Debug.Log($""{previousState}=>{nextState}"");
+            });
+
+            FSM.State(States.A)
+                .OnCondition(()=>FSM.CurrentStateId == States.B)
                 .OnEnter(() =>
                 {
-
+                    Debug.Log(""Enter A"");
                 })
                 .OnUpdate(() =>
-                { 
-                    //if (xxx) fsm.ChangeState(States.B);
-
+                {
+                    
+                })
+                .OnFixedUpdate(() =>
+                {
+                    
+                })
+                .OnGUI(() =>
+                {
+                    GUILayout.Label(""State A"");
+                    if (GUILayout.Button(""To State B""))
+                    {
+                        FSM.ChangeState(States.B);
+                    }
                 })
                 .OnExit(() =>
                 {
-
+                    Debug.Log(""Exit A"");
                 });
 
-            fsm.State(States.B)
-                .OnEnter(() =>
-                {
+                FSM.State(States.B)
+                    .OnCondition(() => FSM.CurrentStateId == States.A)
+                    .OnGUI(() =>
+                    {
+                        GUILayout.Label(""State B"");
+                        if (GUILayout.Button(""To State A""))
+                        {
+                            FSM.ChangeState(States.A);
+                        }
+                    });
+            
+                FSM.StartState(States.A);
+            }
 
-                });
-
-            fsm.StartState(States.A);
-
-            // 需要用 Update 去刷状态机
-            ActionKit.OnUpdate.Register(() =>
+            private void Update()
             {
-                fsm.Update();
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
-        }")]
+                FSM.Update();
+            }
+
+            private void FixedUpdate()
+            {
+                FSM.FixedUpdate();
+            }
+
+            private void OnGUI()
+            {
+                FSM.OnGUI();
+            }
+
+            private void OnDestroy()
+            {
+                FSM.Clear();
+            }
+        }
+    }
+}
+// Enter A
+// Exit A
+// A=>B
+// Enter B
+
+// class state
+using UnityEngine;
+
+namespace QFramework.Example
+{
+    public class IStateClassExample : MonoBehaviour
+    {
+
+        public enum States
+        {
+            A,
+            B,
+            C
+        }
+
+        public FSM<States> FSM = new FSM<States>();
+
+        public class StateA : AbstractState<States,IStateClassExample>
+        {
+            public StateA(FSM<States> fsm, IStateClassExample target) : base(fsm, target)
+            {
+            }
+
+            protected override bool OnCondition()
+            {
+                return mFSM.CurrentStateId == States.B;
+            }
+
+            public override void OnGUI()
+            {
+                GUILayout.Label(""State A"");
+
+                if (GUILayout.Button(""To State B""))
+                {
+                    mFSM.ChangeState(States.B);
+                }
+            }
+        }
+        
+        
+        public class StateB: AbstractState<States,IStateClassExample>
+        {
+            public StateB(FSM<States> fsm, IStateClassExample target) : base(fsm, target)
+            {
+            }
+
+            protected override bool OnCondition()
+            {
+                return mFSM.CurrentStateId == States.A;
+            }
+
+            public override void OnGUI()
+            {
+                GUILayout.Label(""State B"");
+
+                if (GUILayout.Button(""To State A""))
+                {
+                    mFSM.ChangeState(States.A);
+                }
+            }
+        }
+
+        private void Start()
+        {
+            FSM.AddState(States.A, new StateA(FSM, this));
+            FSM.AddState(States.B, new StateB(FSM, this));
+
+            // 支持和链式模式混用
+            // FSM.State(States.C)
+            //     .OnEnter(() =>
+            //     {
+            //
+            //     });
+            
+            FSM.StartState(States.A);
+        }
+
+        private void OnGUI()
+        {
+            FSM.OnGUI();
+        }
+
+        private void OnDestroy()
+        {
+            FSM.Clear();
+        }
+    }
+}
+")]
 #endif
     public class FSM<T>
     {
-        public Dictionary<T, IState> mStates = new Dictionary<T, IState>();
+        protected Dictionary<T, IState> mStates = new Dictionary<T, IState>();
 
+        public void AddState(T id, IState state)
+        {
+            mStates.Add(id,state);
+        }
+        
+        
         public CustomState State(T t)
         {
             if (mStates.ContainsKey(t))
@@ -132,27 +315,47 @@ namespace QFramework
 
         public IState CurrentState => mCurrentState;
         public T CurrentStateId => mCurrentStateId;
+        public T PreviousStateId { get; private set; }
+
+        public long FrameCountOfCurrentState = 1;
+        public float SecondsOfCurrentState = 0.0f;
         
         public void ChangeState(T t)
         {
+            if (t.Equals(CurrentStateId)) return;
+            
             if (mStates.TryGetValue(t, out var state))
             {
-                if (mCurrentState != null)
+                if (mCurrentState != null && state.Condition())
                 {
                     mCurrentState.Exit();
+                    PreviousStateId = mCurrentStateId;
                     mCurrentState = state;
                     mCurrentStateId = t;
+                    mOnStateChanged?.Invoke(PreviousStateId, CurrentStateId);
+                    FrameCountOfCurrentState = 1;
+                    SecondsOfCurrentState = 0.0f;
                     mCurrentState.Enter();
                 }
             }
+        }
+
+        private Action<T, T> mOnStateChanged = (_, __) => { };
+        
+        public void OnStateChanged(Action<T, T> onStateChanged)
+        {
+            mOnStateChanged += onStateChanged;
         }
 
         public void StartState(T t)
         {
             if (mStates.TryGetValue(t, out var state))
             {
+                PreviousStateId = t;
                 mCurrentState = state;
                 mCurrentStateId = t;
+                FrameCountOfCurrentState = 0;
+                SecondsOfCurrentState = 0.0f;
                 state.Enter();
             }
         }
@@ -165,6 +368,13 @@ namespace QFramework
         public void Update()
         {
             mCurrentState?.Update();
+            FrameCountOfCurrentState++;
+            SecondsOfCurrentState += Time.deltaTime;
+        }
+
+        public void OnGUI()
+        {
+            mCurrentState?.OnGUI();
         }
 
         public void Clear()
@@ -174,57 +384,67 @@ namespace QFramework
             mStates.Clear();
         }
     }
-
-    // public class StateManager : MonoBehaviour
-    // {
-    //     
-    // }
-    //
-    // public static class StateManagerExtension
-    // {
-    //     public 
-    // }
-
-
-    public class StateExample : MonoBehaviour
+    
+    public abstract class AbstractState<TStateId,TTarget> : IState
     {
-        public enum States
+        protected FSM<TStateId> mFSM;
+        protected TTarget mTarget;
+
+        public AbstractState(FSM<TStateId> fsm,TTarget target)
         {
-            A,
-            B,
-            C
+            mFSM = fsm;
+            mTarget = target;
         }
 
-        void Example()
+
+        bool IState.Condition()
         {
-            var fsm = new FSM<States>();
-            fsm.State(States.A)
-                .OnEnter(() =>
-                {
-                    
-                })
-                .OnUpdate(() =>
-                { 
-                    //if (xxx) fsm.ChangeState(States.B);
-                    
-                })
-                .OnExit(() =>
-                {
-                    
-                });
+            return  OnCondition();;
+        }
 
-            fsm.State(States.B)
-                .OnEnter(() =>
-                {
+        void IState.Enter()
+        {
+            OnEnter();
+        }
 
-                });
+        void IState.Update()
+        {
+            OnUpdate();
+        }
 
-            fsm.StartState(States.A);
+        void IState.FixedUpdate()
+        {
+            OnFixedUpdate();
+        }
 
-            ActionKit.OnUpdate.Register(() =>
-            {
-                fsm.Update();
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
+        public virtual void OnGUI()
+        {
+        }
+
+        void IState.Exit()
+        {
+            OnExit();
+        }
+
+        protected virtual bool OnCondition() => true;
+
+        protected virtual void OnEnter()
+        {
+        }
+
+        protected virtual void OnUpdate()
+        {
+            
+        }
+
+        protected virtual void OnFixedUpdate()
+        {
+            
+        }
+
+        protected virtual void OnExit()
+        {
+            
         }
     }
 }

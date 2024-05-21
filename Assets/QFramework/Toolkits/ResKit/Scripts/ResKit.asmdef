@@ -1,17 +1,15 @@
 {
     "name": "ResKit",
-    "rootNamespace": "",
     "references": [
-        "GUID:9e97e42c28a41430880bee376c274c86",
-        "GUID:038dff00bcd140258ec2ecc4c541bea0"
+        "QFramework",
+        "QFramework.CoreKit"
     ],
+    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+    "defineConstraints": []
 }

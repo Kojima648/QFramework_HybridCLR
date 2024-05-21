@@ -1,7 +1,7 @@
 /****************************************************************************
- * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2015 - 2024 liangxiegame UNDER MIT License
  * 
- * http://qframework.cn
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
@@ -32,6 +32,7 @@ namespace QFramework
         public static Sequence Allocate()
         {
             var sequence = mSimpleObjectPool.Allocate();
+            sequence.ActionID = ActionKit.ID_GENERATOR++;
             sequence.Reset();
             sequence.Deinited = false;
             return sequence;
@@ -41,6 +42,7 @@ namespace QFramework
 
         public bool Deinited { get; set; }
 
+        public ulong ActionID { get; set; }
         public ActionStatus Status { get; set; }
 
         public void OnStart()
@@ -119,15 +121,15 @@ namespace QFramework
             if (!Deinited)
             {
                 Deinited = true;
-
-                mActions.Clear();
-
+                
                 foreach (var action in mActions)
                 {
                     action.Deinit();
                 }
 
-                mSimpleObjectPool.Recycle(this);
+                mActions.Clear();
+                
+                ActionQueue.AddCallback(new ActionQueueRecycleCallback<Sequence>(mSimpleObjectPool,this));
             }
         }
 
@@ -135,6 +137,7 @@ namespace QFramework
         {
             mCurrentActionIndex = 0;
             Status = ActionStatus.NotStart;
+            Paused = false;
             foreach (var action in mActions)
             {
                 action.Reset();

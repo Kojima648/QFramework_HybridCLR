@@ -1,39 +1,20 @@
 ﻿/****************************************************************************
- * Copyright (c) 2017 ~ 2021.4 liangxie
+ * Copyright (c) 2016 ~ 2023 liangxie
  * 
- * http://qframework.io
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using System.IO;
+using UnityEditor;
 
 namespace QFramework
 {
-    using System.IO;
-    using UnityEditor;
     using UnityEngine;
-
 
     public class ResKitEditorWindow : EditorWindow
     {
@@ -122,8 +103,7 @@ namespace QFramework
             GUILayout.EndVertical();
             GUILayout.Space(50);
 
-            
-            
+
             // RenderEndCommandExecuter.ExecuteCommand();
         }
     }
@@ -132,18 +112,29 @@ namespace QFramework
     public class ResKitView
     {
         private string mResVersion = "100";
-        private bool mEnableGenerateClass = false;
+
+        private bool mEnableGenerateClass
+        {
+            get => EditorPrefs.GetBool(KEY_AUTOGENERATE_CLASS, false);
+            set => EditorPrefs.SetBool(KEY_AUTOGENERATE_CLASS, value);
+        }
 
         private int mBuildTargetIndex = 0;
 
+        public static int GenerateClassNameStyle
+        {
+            get => EditorPrefs.GetInt(KEY_GENERATE_CLASS_NAME_STYLE, 0);
+            set => EditorPrefs.SetInt(KEY_GENERATE_CLASS_NAME_STYLE, value);
+        }
+
         private const string KEY_QAssetBundleBuilder_RESVERSION = "KEY_QAssetBundleBuilder_RESVERSION";
         public const string KEY_AUTOGENERATE_CLASS = "KEY_AUTOGENERATE_CLASS";
+        public const string KEY_GENERATE_CLASS_NAME_STYLE = "KEY_GENERATE_CLASS_NAME_STYLE";
 
 
         public void Init()
         {
             mResVersion = EditorPrefs.GetString(KEY_QAssetBundleBuilder_RESVERSION, "100");
-            mEnableGenerateClass = EditorPrefs.GetBool(KEY_AUTOGENERATE_CLASS, true);
 
             switch (EditorUserBuildSettings.activeBuildTarget)
             {
@@ -187,8 +178,12 @@ namespace QFramework
         {
             fontSize = 12
         });
-        
+
         public EditorWindow EditorWindow { get; set; }
+
+
+        public const int GENERATE_NAME_STYLE_UPPERCASE = 0;
+        public const int GENERATE_NAME_STYLE_KeepOriginal = 1;
 
         public void OnGUI()
         {
@@ -210,9 +205,36 @@ namespace QFramework
 
             mBuildTargetIndex = GUILayout.Toolbar(mBuildTargetIndex, mBuildTargets);
 
+            GUILayout.BeginHorizontal();
             mEnableGenerateClass = GUILayout.Toggle(mEnableGenerateClass, LocaleText.AutoGenerateClass);
-            ResKitEditorAPI.SimulationMode =
-                GUILayout.Toggle(ResKitEditorAPI.SimulationMode, LocaleText.SimulationMode);
+
+            if (mEnableGenerateClass)
+            {
+                GUILayout.FlexibleSpace();
+                GenerateClassNameStyle =
+                    EditorGUILayout.Popup(GenerateClassNameStyle, LocaleText.GenerateClassNameStyleItems);
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            var index = ResKitEditorAPI.SimulationMode ? 0 : 1;
+            index = EditorGUILayout.Popup(index, LocaleText.ModeMenu, GUILayout.Width(100));
+            if (index != (ResKitEditorAPI.SimulationMode ? 0 : 1))
+            {
+                ResKitEditorAPI.SimulationMode = (index == 0);
+            }
+
+            if (ResKitEditorAPI.SimulationMode)
+            {
+                GUILayout.Label(LocaleText.SimulationModeDescription);
+            }
+            else
+            {
+                GUILayout.Label(LocaleText.DeviceModeDescription);
+            }
+
+            GUILayout.EndHorizontal();
 
             // EasyIMGUI.Toggle()
             //    .Text(LocaleText.EncryptAB)
@@ -250,12 +272,6 @@ namespace QFramework
                     {
                         EditorWindow.Close();
                     }
-                    // var window = container.Resolve<EditorWindow>();
-                    //
-                    // if (window)
-                    // {
-                    //     window.Close();
-                    // }
 
                     ResKitEditorAPI.BuildAssetBundles();
                     //if (GetConfig().EncryptAB)
@@ -280,26 +296,26 @@ namespace QFramework
                 GUILayout.BeginVertical("box");
                 {
                     foreach (var n in AssetDatabase.GetAllAssetBundleNames()
-                        .SelectMany(n =>
-                        {
-                            var result = AssetDatabase.GetAssetPathsFromAssetBundle(n);
+                                 .SelectMany(n =>
+                                 {
+                                     var result = AssetDatabase.GetAssetPathsFromAssetBundle(n);
 
-                            return result.Select(r =>
-                                {
-                                    if (ResKitAssetsMenu.Marked(r))
-                                    {
-                                        return r;
-                                    }
+                                     return result.Select(r =>
+                                         {
+                                             if (ResKitAssetsMenu.Marked(r))
+                                             {
+                                                 return r;
+                                             }
 
-                                    if (ResKitAssetsMenu.Marked(r.GetFolderPath()))
-                                    {
-                                        return r.GetFolderPath();
-                                    }
+                                             if (ResKitAssetsMenu.Marked(r.GetFolderPath()))
+                                             {
+                                                 return r.GetFolderPath();
+                                             }
 
-                                    return null;
-                                }).Where(r => r != null)
-                                .Distinct();
-                        }))
+                                             return null;
+                                         }).Where(r => r != null)
+                                         .Distinct();
+                                 }))
                     {
                         GUILayout.BeginHorizontal();
                         {
@@ -331,66 +347,101 @@ namespace QFramework
 
         public void OnDispose()
         {
-            EditorPrefs.SetBool(KEY_AUTOGENERATE_CLASS, mEnableGenerateClass);
             EditorPrefs.SetString(KEY_QAssetBundleBuilder_RESVERSION, mResVersion);
+        }
+
+        public class LocaleText
+        {
+            public static bool IsCN => LocaleKitEditor.IsCN.Value;
+            public static string ResKit => IsCN ? "Res Kit 设置" : "Res Kit Setting";
+
+            public static string GoToPersistent => IsCN ? "打开 Persistent 目录" : "Go To Persistance";
+
+            public static string GenerateClass => IsCN ? "生成代码（资源名常量）" : "Generate Class";
+
+            public static string Build => IsCN ? "打 AB 包" : "Build";
+
+            public static string ForceClear => IsCN ? "清空已生成的 AB" : "ForceClear";
+
+            public static string AutoGenerateClass => IsCN ? "打 AB 包时，自动生成资源名常量代码" : "auto generate class when build";
+
+            private static string[] mGenerateClassNameStyleItemsCN = new string[]
+            {
+                "全大写（UILoginPanel=>UILOGINPANEL）",
+                "保持原名（UILoginPanel=>UILoginPanel）"
+            };
+
+            private static string[] mGenerateClassNameStyleItemsEN = new[]
+            {
+                "UPPERCASE(UILoginPanel=>UILOGINPANEL)",
+                "KeepOriginal(UILoginPanel=>UILoginPanel)"
+            };
+
+            public static string[] GenerateClassNameStyleItems =>
+                IsCN ? mGenerateClassNameStyleItemsCN : mGenerateClassNameStyleItemsEN;
+
+            private static string[] mModeMenuCN = new[]
+            {
+                "模拟模式",
+                "真机模式"
+            };
+
+            private static string[] mModeMenuEN = new[]
+            {
+                "SimulationMode",
+                "DeviceMode"
+            };
+
+            public static string[] ModeMenu => IsCN ? mModeMenuCN : mModeMenuEN;
+
+            public static string SimulationModeDescription =>
+                IsCN
+                    ? "不用主动调用 ResKit.Init 或 ResKit.InitAsync.每当资源修改时无需再打 AB 包，开发阶段建议选择"
+                    : "Don't need to call ResKit.Init or ResKit.InitAsync.When Assets modified, don't need to build AB package";
+
+            public static string DeviceModeDescription =>
+                IsCN
+                    ? "每当资源修改时需要打 AB 包，需要在游戏运行后调用 ResKit.Init 或 ResKit.InitAsync，在真机上只支持此模式"
+                    : "Need call ResKit.Init or ResKit.InitAsync after game run.When Assets modified, need to build AB.Only this mode is supported on real machines";
+
+            public static string CancelMark =>
+                IsCN
+                    ? "取消标记"
+                    : "Cancel Mark";
+
+            public static string Select =>
+                IsCN
+                    ? "选择"
+                    : "Select";
+
+            public static string MarkedAb =>
+                IsCN
+                    ? "已标记的 AB"
+                    : "Marked AB";
+
+            // public static string EncryptAB
+            // {
+            //     get
+            //     {
+            //         return Language.IsChinese
+            //             ? "加密AB(AES加密)"
+            //             : "EncryptAB";
+            //     }
+            // }
+            //
+            // public static string EncryptKey
+            // {
+            //     get
+            //     {
+            //         return Language.IsChinese
+            //             ? "加密秘钥(RSA加密)"
+            //             : "EncryptKey";
+            //     }
+            // }
         }
     }
 
-    public class LocaleText
-    {
-        public static bool IsCN => LocaleKitEditor.IsCN.Value;
-        public static string ResKit => IsCN ? "Res Kit 设置" : "Res Kit Setting";
 
-        public static string GoToPersistent => IsCN ? "打开 Persistent 目录" : "Go To Persistance";
-
-        public static string GenerateClass => IsCN ? "生成代码（资源名常量）" : "Generate Class";
-
-        public static string Build => IsCN ? "打 AB 包" : "Build";
-
-        public static string ForceClear => IsCN ? "清空已生成的 AB" : "ForceClear";
-
-        public static string AutoGenerateClass => IsCN ? "打 AB 包时，自动生成资源名常量代码" : "auto generate class when build";
-
-        public static string SimulationMode =>
-            IsCN
-                ? "模拟模式（勾选后每当资源修改时无需再打 AB 包，开发阶段建议勾选，打真机包时取消勾选并打一次 AB 包）"
-                : "Simulation Mode";
-
-        public static string CancelMark =>
-            IsCN
-                ? "取消标记"
-                : "Cancel Mark";
-
-        public static string Select =>
-            IsCN
-                ? "选择"
-                : "Select";
-
-        public static string MarkedAb =>
-            IsCN
-                ? "已标记的 AB"
-                : "Marked AB";
-
-        // public static string EncryptAB
-        // {
-        //     get
-        //     {
-        //         return Language.IsChinese
-        //             ? "加密AB(AES加密)"
-        //             : "EncryptAB";
-        //     }
-        // }
-        //
-        // public static string EncryptKey
-        // {
-        //     get
-        //     {
-        //         return Language.IsChinese
-        //             ? "加密秘钥(RSA加密)"
-        //             : "EncryptKey";
-        //     }
-        // }
-    }
     internal class EditorLifecycle
     {
         static EditorLifecycle()
@@ -402,7 +453,7 @@ namespace QFramework
         {
             ExecuteCommand();
         }
-        
+
         private static Queue<System.Action> mPrivateCommands = new Queue<System.Action>();
 
         private static Queue<System.Action> mCommands

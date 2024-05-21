@@ -238,7 +238,7 @@ namespace QFramework
 
                     // 标记 AssetBundle
                     ResKitAssetsMenu.MarkAB(panelPrefabPath);
-
+                    
                     var tester = new GameObject("Test{0}".FillFormat(panelName));
                     var uiPanelTester = tester.AddComponent<ResKitUIPanelTester>();
                     uiPanelTester.PanelName = panelName;

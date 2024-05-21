@@ -1,7 +1,7 @@
 /****************************************************************************
- * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2015 - 2024 liangxiegame UNDER MIT License
  * 
- * http://qframework.cn
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
@@ -24,6 +24,7 @@ namespace QFramework
         public static Callback Allocate(Action callback)
         {
             var callbackAction = mSimpleObjectPool.Allocate();
+            callbackAction.ActionID = ActionKit.ID_GENERATOR++;
             callbackAction.Reset();
             callbackAction.Deinited = false;
             callbackAction.mCallback = callback;
@@ -32,6 +33,7 @@ namespace QFramework
 
         public bool Paused { get; set; }
         public bool Deinited { get; set; }
+        public ulong ActionID { get; set; }
         public ActionStatus Status { get; set; }
 
         public void OnStart()
@@ -54,12 +56,13 @@ namespace QFramework
             {
                 Deinited = true;
                 mCallback = null;
-                mSimpleObjectPool.Recycle(this);
+                ActionQueue.AddCallback(new ActionQueueRecycleCallback<Callback>(mSimpleObjectPool,this));
             }
         }
 
         public void Reset()
         {
+            Paused = false;
             Status = ActionStatus.NotStart;
         }
     }

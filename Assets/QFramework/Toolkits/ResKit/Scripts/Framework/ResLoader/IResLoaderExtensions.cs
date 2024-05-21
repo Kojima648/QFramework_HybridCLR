@@ -20,6 +20,8 @@ namespace QFramework
 #endif
     public static class IResLoaderExtensions
     {
+        private static Type ComponentType = typeof(Component);
+        private static Type GameObjectType = typeof(GameObject);
         
 #if UNITY_EDITOR
         [MethodAPI]
@@ -34,18 +36,41 @@ texture = mResLoader.LoadSync<Texture2D>(""MyBundle"",""MyAsset"");
 #endif
         public static T LoadSync<T>(this IResLoader self, string assetName) where T : Object
         {
-            var resSearchKeys = ResSearchKeys.Allocate(assetName, null, typeof(T));
-            var retAsset = self.LoadAssetSync(resSearchKeys) as T;
-            resSearchKeys.Recycle2Cache();
-            return retAsset;
+            var type = typeof(T);
+            if (ComponentType.IsAssignableFrom(type))
+            {
+                var resSearchKeys = ResSearchKeys.Allocate(assetName, null, GameObjectType);
+                var retAsset = (self.LoadAssetSync(resSearchKeys) as GameObject)?.GetComponent<T>();
+                resSearchKeys.Recycle2Cache();
+                return retAsset;
+            }
+            else
+            {
+                var resSearchKeys = ResSearchKeys.Allocate(assetName, null, type);
+                var retAsset = self.LoadAssetSync(resSearchKeys) as T;
+                resSearchKeys.Recycle2Cache();
+                return retAsset;
+            }
         }
-
+        
+        
         public static T LoadSync<T>(this IResLoader self, string ownerBundle, string assetName) where T : Object
         {
-            var resSearchKeys = ResSearchKeys.Allocate(assetName, ownerBundle, typeof(T));
-            var retAsset = self.LoadAssetSync(resSearchKeys) as T;
-            resSearchKeys.Recycle2Cache();
-            return retAsset;
+            var type = typeof(T);
+            if (ComponentType.IsAssignableFrom(type))
+            {
+                var resSearchKeys = ResSearchKeys.Allocate(assetName, ownerBundle, GameObjectType);
+                var retAsset = (self.LoadAssetSync(resSearchKeys) as GameObject)?.GetComponent<T>();
+                resSearchKeys.Recycle2Cache();
+                return retAsset;
+            }
+            else
+            {
+                var resSearchKeys = ResSearchKeys.Allocate(assetName, ownerBundle, type);
+                var retAsset = self.LoadAssetSync(resSearchKeys) as T;
+                resSearchKeys.Recycle2Cache();
+                return retAsset;
+            }
         }
         
 #if UNITY_EDITOR
@@ -69,6 +94,7 @@ mResLoader.LoadAsync(()=>
         public static void Add2Load(this IResLoader self, string assetName, Action<bool, IRes> listener = null,
             bool lastOrder = true)
         {
+            
             var searchRule = ResSearchKeys.Allocate(assetName);
             self.Add2Load(searchRule, listener, lastOrder);
             searchRule.Recycle2Cache();
@@ -77,9 +103,19 @@ mResLoader.LoadAsync(()=>
         public static void Add2Load<T>(this IResLoader self, string assetName, Action<bool, IRes> listener = null,
             bool lastOrder = true)
         {
-            var searchRule = ResSearchKeys.Allocate(assetName, null, typeof(T));
-            self.Add2Load(searchRule, listener, lastOrder);
-            searchRule.Recycle2Cache();
+            var type = typeof(T);
+            if (ComponentType.IsAssignableFrom(type))
+            {
+                var resSearchKeys = ResSearchKeys.Allocate(assetName, null, GameObjectType);
+                self.Add2Load(resSearchKeys, listener, lastOrder);
+                resSearchKeys.Recycle2Cache();
+            }
+            else
+            {
+                var searchRule = ResSearchKeys.Allocate(assetName, null, type);
+                self.Add2Load(searchRule, listener, lastOrder);
+                searchRule.Recycle2Cache();
+            }
         }
 
 
@@ -88,7 +124,6 @@ mResLoader.LoadAsync(()=>
             bool lastOrder = true)
         {
             var searchRule = ResSearchKeys.Allocate(assetName, ownerBundle);
-
             self.Add2Load(searchRule, listener, lastOrder);
             searchRule.Recycle2Cache();
         }
@@ -97,9 +132,19 @@ mResLoader.LoadAsync(()=>
             Action<bool, IRes> listener = null,
             bool lastOrder = true)
         {
-            var searchRule = ResSearchKeys.Allocate(assetName, ownerBundle, typeof(T));
-            self.Add2Load(searchRule, listener, lastOrder);
-            searchRule.Recycle2Cache();
+            var type = typeof(T);
+            if (ComponentType.IsAssignableFrom(type))
+            {
+                var resSearchKeys = ResSearchKeys.Allocate(assetName, ownerBundle, GameObjectType);
+                self.Add2Load(resSearchKeys, listener, lastOrder);
+                resSearchKeys.Recycle2Cache();
+            }
+            else
+            {
+                var searchRule = ResSearchKeys.Allocate(assetName, ownerBundle, type);
+                self.Add2Load(searchRule, listener, lastOrder);
+                searchRule.Recycle2Cache();
+            }
         }
         
 
@@ -154,7 +199,6 @@ mResLoader.LoadSceneSync(""BattleScene"",LoadSceneMode.Additive,LocalPhysicsMode
                     {
                         UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(path,
                             new LoadSceneParameters(mode, physicsMode));
-                        resSearchRule.Recycle2Cache();
                     }
                 }
                 else
@@ -162,12 +206,10 @@ mResLoader.LoadSceneSync(""BattleScene"",LoadSceneMode.Additive,LocalPhysicsMode
                 {
                     self.LoadResSync(resSearchRule);
                     SceneManager.LoadScene(resSearchRule.OriginalAssetName, new LoadSceneParameters(mode, physicsMode));
-                    resSearchRule.Recycle2Cache();
                 }
             }
             else
             {
-                resSearchRule.Recycle2Cache();
                 Debug.LogError("资源名称错误！请检查资源名称是否正确或是否被标记！AssetName:" + resSearchRule.AssetName);
             }
         }
@@ -209,7 +251,7 @@ mResLoader.LoadSceneAsync(""BattleScene"",(operation)=>
             Action<AsyncOperation> onStartLoading = null)
         {
 
-            var resSearchKey = ResSearchKeys.Allocate(bundleName,sceneName);
+            var resSearchKey = ResSearchKeys.Allocate(sceneName,bundleName);
             self.LoadSceneAsync(resSearchKey,loadSceneMode,physicsMode,onStartLoading);
             resSearchKey.Recycle2Cache();
         }
@@ -240,22 +282,27 @@ mResLoader.LoadSceneAsync(""BattleScene"",(operation)=>
                             localPhysicsMode = physicsMode
                         };
 
-                        onStartLoading(UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(path,
-                            sceneParameters));
+                        var asyncOperation = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                            path,
+                            sceneParameters);
+                        onStartLoading?.Invoke(asyncOperation);
                     }
                 }
                 else
 #endif
                 {
-                    self.LoadAsync(() =>
+                    var sceneName = resSearchKeys.OriginalAssetName;
+                    
+                    self.Add2Load(resSearchKeys,(b, res1) =>
                     {
-                        var asyncOperation = SceneManager.LoadSceneAsync(resSearchKeys.OriginalAssetName, new LoadSceneParameters()
+                        var asyncOperation = SceneManager.LoadSceneAsync(sceneName, new LoadSceneParameters()
                         {
                             loadSceneMode = loadSceneMode,
                             localPhysicsMode = physicsMode
                         });
                         onStartLoading?.Invoke(asyncOperation);
                     });
+                    self.LoadAsync();
                 }
             }
             else

@@ -4,6 +4,8 @@
  * http://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
+ *
+ * 感谢 于大进 提供反馈
  ****************************************************************************/
 
 using System.Collections.Generic;
@@ -52,6 +54,11 @@ names.Release2Pool();
         /// <param name="toRelease"></param>
         public static void Release(List<T> toRelease)
         {
+            if (mListStack.Contains(toRelease))
+            {
+                throw new System.InvalidOperationException ("重复回收 List，The List is released even though it is in the pool");
+            }
+
             toRelease.Clear();
             mListStack.Push(toRelease);
         }

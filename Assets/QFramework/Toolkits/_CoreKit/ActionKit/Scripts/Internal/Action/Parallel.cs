@@ -1,13 +1,14 @@
 /****************************************************************************
- * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2015 - 2024 liangxiegame UNDER MIT License
  * 
- * http://qframework.cn
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace QFramework
 {
@@ -29,16 +30,17 @@ namespace QFramework
         public static Parallel Allocate()
         {
             var parallel = mSimpleObjectPool.Allocate();
+            parallel.ActionID = ActionKit.ID_GENERATOR++;
             parallel.Deinited = false;
             parallel.Reset();
             return parallel;
         }
         public bool Paused { get; set; }
         public bool Deinited { get; set; }
+        public ulong ActionID { get; set; }
         public ActionStatus Status { get; set; }
         public void OnStart()
         {
-            
         }
 
         public void OnExecute(float dt)
@@ -87,7 +89,7 @@ namespace QFramework
                 
                 mActions.Clear();
                 
-                mSimpleObjectPool.Recycle(this);
+                ActionQueue.AddCallback(new ActionQueueRecycleCallback<Parallel>(mSimpleObjectPool,this));
             }
 
         }
@@ -95,13 +97,13 @@ namespace QFramework
         public void Reset()
         {
             Status = ActionStatus.NotStart;
-            
+            mFinishedCount = 0;
+            Paused = false;
             foreach (var action in mActions)
             {
                 action.Reset();
             }
             
-            mFinishedCount = 0;
         }
     }
     

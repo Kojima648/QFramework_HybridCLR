@@ -573,5 +573,10 @@ public class MyScript : MonoBehaviour
         {
             ReleaseAllRes();
         }
+
+        public void LoadAsync<T>(string asset, Action<object> value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

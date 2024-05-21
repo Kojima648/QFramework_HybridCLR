@@ -1,7 +1,7 @@
 /****************************************************************************
- * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2015 - 2024 liangxiegame UNDER MIT License
  * 
- * http://qframework.cn
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
@@ -16,7 +16,7 @@ namespace QFramework
 
     public class Repeat : IRepeat
     {
-        private Sequence mSequence = Sequence.Allocate();
+        private Sequence mSequence = null;
 
         private int mRepeatCount = -1;
         private int mCurrentRepeatCount = 0;
@@ -31,6 +31,8 @@ namespace QFramework
         public static Repeat Allocate(int repeatCount = -1)
         {
             var repeat = mSimpleObjectPool.Allocate();
+            repeat.ActionID = ActionKit.ID_GENERATOR++;
+            repeat.mSequence = Sequence.Allocate();
             repeat.Deinited = false;
             repeat.Reset();
             repeat.mRepeatCount = repeatCount;
@@ -39,6 +41,7 @@ namespace QFramework
 
         public bool Paused { get; set; }
         public bool Deinited { get; set; }
+        public ulong ActionID { get; set; }
         public ActionStatus Status { get; set; }
 
         public void OnStart()
@@ -88,8 +91,10 @@ namespace QFramework
             if (!Deinited)
             {
                 Deinited = true;
-
-                mSimpleObjectPool.Recycle(this);
+                
+                mSequence.Deinit();
+                
+                ActionQueue.AddCallback(new ActionQueueRecycleCallback<Repeat>(mSimpleObjectPool,this));
             }
         }
 
@@ -97,6 +102,7 @@ namespace QFramework
         {
             mCurrentRepeatCount = 0;
             Status = ActionStatus.NotStart;
+            Paused = false;
             mSequence.Reset();
         }
     }

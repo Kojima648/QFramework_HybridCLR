@@ -37,13 +37,12 @@ namespace QFramework
         {
             get { return UIRoot.Instance; }
         }
-
+        
         public virtual IPanel LoadPanel(PanelSearchKeys panelSearchKeys)
         {
             var panelLoader = PanelLoaderPool.AllocateLoader();
-
-            panelLoader.LoadPanelPrefab(panelSearchKeys);
-
+            
+            // panelLoader.LoadPanelPrefab 感谢 NormalKatt、高跟鞋提供为反馈
             var panelPrefab = panelLoader.LoadPanelPrefab(panelSearchKeys);
 
             var obj = Object.Instantiate(panelPrefab);

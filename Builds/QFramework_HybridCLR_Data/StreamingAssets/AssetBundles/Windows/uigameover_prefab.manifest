@@ -1,0 +1,38 @@
+ManifestFileVersion: 0
+CRC: 1013119174
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 953d70d3b983e93c5fc08f6293e024b8
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c5c3f90ab3e697a49ee9b651b0603be9
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: d4adaa1cefa7fad44a3ab3b7f61145ac, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0d51f3a7c41ab0346b49ae50d456bece, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentCallGroup
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
+Assets:
+- Assets/QFramework/Toolkits.Demo.WuZiQi/Art/UIPrefab/UIGameOver.prefab
+Dependencies:
+- E:/Workspace/Unity3D/QFramework_HybridCLR/AssetBundles/Windows/uisprites

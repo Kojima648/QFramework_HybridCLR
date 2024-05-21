@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2016 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2016 - 2023 liangxiegame UNDER MIT License
  * 
  * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 
 namespace QFramework
 {
@@ -19,6 +20,8 @@ namespace QFramework
 #endif
     public class ActionKit : Architecture<ActionKit>
     {
+        public static ulong ID_GENERATOR = 0;
+        
 #if UNITY_EDITOR
         [MethodAPI]
         [APIDescriptionCN("延时回调")]
@@ -106,6 +109,17 @@ ActionKit.Sequence()
         public static IAction NextFrame(Action onNextFrame)
         {
             return QFramework.DelayFrame.Allocate(1, onNextFrame);
+        }
+
+
+        public static IAction Lerp(float a,float b,float duration,Action<float> onLerp,Action onLerpFinish = null)
+        {
+            return QFramework.Lerp.Allocate(a, b, duration, onLerp, onLerpFinish);
+        }
+
+        public static IAction Callback(Action callback)
+        {
+            return QFramework.Callback.Allocate(callback);
         }
 
 
@@ -337,6 +351,33 @@ ActionKit.Sequence()
         public static IAction Coroutine(Func<IEnumerator> coroutineGetter)
         {
             return CoroutineAction.Allocate(coroutineGetter);
+        }
+        
+#if UNITY_EDITOR
+        [MethodAPI]
+        [APIDescriptionCN("Task 支持")]
+        [APIDescriptionEN("Task action example")]
+        [APIExampleCode(@"
+async Task SomeTask()
+{
+    await Task.Delay(TimeSpan.FromSeconds(1.0f));
+    Debug.Log(""Hello:"" + Time.time);
+}
+
+ActionKit.Task(SomeTask).Start(this);
+
+SomeTask().ToAction().Start(this);
+
+ActionKit.Sequence()
+    .Task(SomeTask)
+    .Start(this);
+
+// Hello:1.0039
+")]
+#endif
+        public static IAction Task(Func<Task> taskGetter)
+        {
+            return TaskAction.Allocate(taskGetter);
         }
 
 

@@ -1,6 +1,6 @@
 /****************************************************************************
  * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
- * 
+ *
  * http://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
@@ -89,9 +89,9 @@ selfScript
 myScript.Parent(rootGameObj);
 ")]
 #endif
-        public static T Parent<T>(this T self, Component parentComponent) where T : Component
+        public static T Parent<T>(this T self, Component parent) where T : Component
         {
-            self.transform.SetParent(parentComponent == null ? null : parentComponent.transform);
+            self.transform.SetParent(parent == null ? null : parent.transform);
             return self;
         }
 
@@ -104,9 +104,9 @@ myScript.Parent(rootGameObj);
 gameObj.SetParent(null);
 ")]
 #endif
-        public static GameObject Parent(this GameObject self, Component parentComponent)
+        public static GameObject Parent(this GameObject self, Component parent)
         {
-            self.transform.SetParent(parentComponent == null ? null : parentComponent.transform);
+            self.transform.SetParent(parent == null ? null : parent.transform);
             return self;
         }
 
@@ -725,6 +725,35 @@ gameObj.LocalScaleX(10);
         }
 
 #if UNITY_EDITOR
+        // Added in v1.0.31
+        [MethodAPI]
+        [APIDescriptionCN("gameObj.transform.localScale.x")]
+        [APIDescriptionEN("gameObj.transform.localScale.x)")]
+        [APIExampleCode(@"
+var scaleX = gameObj.LocalScaleX();
+")]
+#endif
+        public static float LocalScaleX(this GameObject self)
+        {
+            return self.transform.localScale.x;
+        }
+
+#if UNITY_EDITOR
+        // Added in v1.0.31
+        [MethodAPI]
+        [APIDescriptionCN("component.transform.localScale.x")]
+        [APIDescriptionEN("component.transform.localScale.x)")]
+        [APIExampleCode(@"
+var scaleX = component.LocalScaleX();
+")]
+#endif
+        public static float LocalScaleX<T>(this T self) where T : Component
+        {
+            return self.transform.localScale.x;
+        }
+
+
+#if UNITY_EDITOR
         // v1 No.105
         [MethodAPI]
         [APIDescriptionCN("component.transform.localScale.y = y")]
@@ -733,12 +762,12 @@ gameObj.LocalScaleX(10);
 component.LocalScaleY(10);
 ")]
 #endif
-        public static T LocalScaleY<T>(this T selfComponent, float y) where T : Component
+        public static T LocalScaleY<T>(this T self, float y) where T : Component
         {
-            var localScale = selfComponent.transform.localScale;
+            var localScale = self.transform.localScale;
             localScale.y = y;
-            selfComponent.transform.localScale = localScale;
-            return selfComponent;
+            self.transform.localScale = localScale;
+            return self;
         }
 
 #if UNITY_EDITOR
@@ -750,13 +779,42 @@ component.LocalScaleY(10);
 gameObj.LocalScaleY(10);
 ")]
 #endif
-        public static GameObject LocalScaleY(this GameObject selfComponent, float y)
+        public static GameObject LocalScaleY(this GameObject self, float y)
         {
-            var localScale = selfComponent.transform.localScale;
+            var localScale = self.transform.localScale;
             localScale.y = y;
-            selfComponent.transform.localScale = localScale;
-            return selfComponent;
+            self.transform.localScale = localScale;
+            return self;
         }
+
+#if UNITY_EDITOR
+        // Added in v1.0.31
+        [MethodAPI]
+        [APIDescriptionCN("component.transform.localScale.y")]
+        [APIDescriptionEN("component.transform.localScale.y)")]
+        [APIExampleCode(@"
+var scaleY = component.LocalScaleY(10);
+")]
+#endif
+        public static float LocalScaleY<T>(this T self) where T : Component
+        {
+            return self.transform.localScale.y;
+        }
+
+#if UNITY_EDITOR
+        // Added in v1.0.31
+        [MethodAPI]
+        [APIDescriptionCN("gameObj.transform.localScale.y")]
+        [APIDescriptionEN("gameObj.transform.localScale.y)")]
+        [APIExampleCode(@"
+var scaleY = gameObj.LocalScaleY();
+")]
+#endif
+        public static float LocalScaleY(this GameObject self)
+        {
+            return self.transform.localScale.y;
+        }
+
 
 #if UNITY_EDITOR
         // v1 No.107
@@ -791,6 +849,35 @@ gameObj.LocalScaleZ(10);
             selfComponent.transform.localScale = localScale;
             return selfComponent;
         }
+
+#if UNITY_EDITOR
+        // Added in v1.0.31
+        [MethodAPI]
+        [APIDescriptionCN("component.transform.localScale.z")]
+        [APIDescriptionEN("component.transform.localScale.z)")]
+        [APIExampleCode(@"
+var scaleZ = component.LocalScaleZ();
+")]
+#endif
+        public static float LocalScaleZ<T>(this T self) where T : Component
+        {
+            return self.transform.localScale.z;
+        }
+
+#if UNITY_EDITOR
+        // Added in v1.0.31
+        [MethodAPI]
+        [APIDescriptionCN("gameObj.transform.localScale.z")]
+        [APIDescriptionEN("gameObj.transform.localScale.z)")]
+        [APIExampleCode(@"
+var scaleZ = gameObj.LocalScaleZ();
+")]
+#endif
+        public static float LocalScaleZ(this GameObject self)
+        {
+            return self.transform.localScale.z;
+        }
+
 
 #if UNITY_EDITOR
         // v1 No.109
@@ -1357,6 +1444,32 @@ rootTransform.DestroyChildren();
         }
 
 #if UNITY_EDITOR
+        // v1 No.141.1
+        [MethodAPI]
+        [APIDescriptionCN("根据条件 Destroy 掉所有的子 GameObject ")]
+        [APIDescriptionEN("destroy all child gameObjects if condition matched")]
+        [APIExampleCode(@"
+rootTransform.DestroyChildrenWithCondition(child=>child != other);
+")]
+#endif
+        public static T DestroyChildrenWithCondition<T>(this T selfComponent, Func<Transform, bool> condition)
+            where T : Component
+        {
+            var childCount = selfComponent.transform.childCount;
+
+            for (var i = 0; i < childCount; i++)
+            {
+                var child = selfComponent.transform.GetChild(i);
+                if (condition(child))
+                {
+                    child.DestroyGameObjGracefully();
+                }
+            }
+
+            return selfComponent;
+        }
+
+#if UNITY_EDITOR
         // v1 No.142
         [MethodAPI]
         [APIDescriptionCN("Destroy 掉所有的子 GameObject")]
@@ -1451,7 +1564,7 @@ myScript.SiblingIndex(10);
             selfComponent.transform.SetSiblingIndex(index);
             return selfComponent;
         }
-        
+
 #if UNITY_EDITOR
         // v1 No.148
         [MethodAPI]
@@ -1466,6 +1579,237 @@ gameObj.SiblingIndex(10);
             selfComponent.transform.SetSiblingIndex(index);
             return selfComponent;
         }
+
+        public static Vector2 Position2D(this GameObject self)
+        {
+            return new Vector2(self.transform.position.x, self.transform.position.y);
+        }
+
+        public static Vector2 Position2D(this Component self)
+        {
+            return new Vector2(self.transform.position.x, self.transform.position.y);
+        }
+
+        public static GameObject Position2D(this GameObject self, Vector2 position)
+        {
+            return self.Position(position.x, position.y);
+        }
+
+        public static T Position2D<T>(this T self, Vector2 position) where T : Component
+        {
+            return self.Position(position.x, position.y);
+        }
+
+        public static Vector2 LocalPosition2D(this GameObject self)
+        {
+            return new Vector2(self.transform.localPosition.x, self.transform.localPosition.y);
+        }
+
+        public static Vector2 LocalPosition2D(this Component self)
+        {
+            return new Vector2(self.transform.localPosition.x, self.transform.localPosition.y);
+        }
+
+        public static GameObject LocalPosition2D(this GameObject self, Vector2 position)
+        {
+            return self.LocalPosition(position.x, position.y);
+        }
+
+        public static T LocalPosition2D<T>(this T self, Vector2 position) where T : Component
+        {
+            return self.LocalPosition(position.x, position.y);
+        }
+
+        public static GameObject SyncPositionFrom(this GameObject self, GameObject from)
+        {
+            return self.Position(from.Position());
+        }
+
+        public static T SyncPositionFrom<T>(this T self, GameObject from) where T : Component
+        {
+            return self.Position(from.Position());
+        }
+
+        public static GameObject SyncPositionFrom<T>(this GameObject self, Component from) where T : Component
+        {
+            return self.Position(from.Position());
+        }
+
+        public static T SyncPositionFrom<T>(this T self, Component from) where T : Component
+        {
+            return self.Position(from.Position());
+        }
+
+        public static GameObject SyncPosition2DFrom(this GameObject self, GameObject from) =>
+            self.Position2D(from.Position2D());
+
+        public static T SyncPosition2DFrom<T>(this T self, GameObject from) where T : Component =>
+            self.Position2D(from.Position2D());
+
+        public static GameObject SyncPosition2DFrom(this GameObject self, Component from) =>
+            self.Position2D(from.Position2D());
+
+        public static T SyncPosition2DFrom<T>(this T self, Component from) where T : Component =>
+            self.Position2D(from.Position2D());
+
+
+        public static GameObject SyncPositionTo(this GameObject self, GameObject to)
+        {
+            to.Position(self.Position());
+            return self;
+        }
+
+        public static GameObject SyncPositionTo(this GameObject self, Component to)
+        {
+            to.Position(self.Position());
+            return self;
+        }
+
+        public static T SyncPositionTo<T>(this T self, GameObject to) where T : Component
+        {
+            to.Position(self.Position());
+            return self;
+        }
+
+        public static T SyncPositionTo<T>(this T self, Component to) where T : Component
+        {
+            to.Position(self.Position());
+            return self;
+        }
+
+        public static GameObject SyncPosition2DTo(this GameObject self, GameObject to)
+        {
+            to.Position2D(self.Position2D());
+            return self;
+        }
+
+        public static GameObject SyncPosition2DTo(this GameObject self, Component to)
+        {
+            to.Position2D(self.Position2D());
+            return self;
+        }
+
+        public static T SyncPosition2DTo<T>(this T self, GameObject to) where T : Component
+        {
+            to.Position2D(self.Position2D());
+            return self;
+        }
+
+        public static T SyncPosition2DTo<T>(this T self, Component to) where T : Component
+        {
+            to.Position2D(self.Position2D());
+            return self;
+        }
+
+        public static float PositionX(this GameObject self)
+        {
+            return self.transform.position.x;
+        }
+
+        public static float PositionX(this Component self)
+        {
+            return self.transform.position.x;
+        }
+
+        public static float PositionY(this GameObject self)
+        {
+            return self.transform.position.y;
+        }
+
+        public static float PositionY(this Component self)
+        {
+            return self.transform.position.y;
+        }
+
+        public static float PositionZ(this GameObject self)
+        {
+            return self.transform.position.z;
+        }
+
+        public static float PositionZ(this Component self)
+        {
+            return self.transform.position.z;
+        }
+
+        public static float LocalPositionX(this GameObject self)
+        {
+            return self.transform.localPosition.x;
+        }
+
+        public static float LocalPositionX(this Component self)
+        {
+            return self.transform.localPosition.x;
+        }
+
+        public static float LocalPositionY(this GameObject self)
+        {
+            return self.transform.localPosition.y;
+        }
+
+        public static float LocalPositionY(this Component self)
+        {
+            return self.transform.localPosition.y;
+        }
+
+        public static float LocalPositionZ(this GameObject self)
+        {
+            return self.transform.localPosition.z;
+        }
+
+        public static float LocalPositionZ(this Component self) => self.transform.localPosition.z;
+        public static Vector3 LocalEulerAngles(this GameObject self) => self.transform.localEulerAngles;
+        public static Vector3 LocalEulerAngles(this Component self) => self.transform.localEulerAngles;
+
+        public static GameObject LocalEulerAngles(this GameObject self, Vector3 localEulerAngles)
+        {
+            self.transform.localEulerAngles = localEulerAngles;
+            return self;
+        }
+
+        public static T LocalEulerAngles<T>(this T self, Vector3 localEulerAngles) where T : Component
+        {
+            self.transform.localEulerAngles = localEulerAngles;
+            return self;
+        }
+
+        public static GameObject LocalEulerAnglesZ(this GameObject self, float z)
+        {
+            self.LocalEulerAngles(self.LocalEulerAngles().Z(z));
+            return self;
+        }
+
+        public static T LocalEulerAnglesZ<T>(this T self, float z) where T : Component
+        {
+            self.LocalEulerAngles(self.LocalEulerAngles().Z(z));
+            return self;
+        }
         
+        
+        public static Vector3 EulerAngles(this GameObject self) => self.transform.eulerAngles;
+        public static Vector3 EulerAngles(this Component self) => self.transform.eulerAngles;
+
+        public static GameObject EulerAngles(this GameObject self, Vector3 eulerAngles)
+        {
+            self.transform.eulerAngles = eulerAngles;
+            return self;
+        }
+
+        public static T EulerAngles<T>(this T self, Vector3 eulerAngles) where T : Component
+        {
+            self.transform.eulerAngles = eulerAngles;
+            return self;
+        }
+
+        public static GameObject EulerAnglesZ(this GameObject self, float z)
+        {
+            self.EulerAngles(self.EulerAngles().Z(z));
+            return self;
+        }
+
+        public static T EulerAnglesZ<T>(this T self, float z) where T : Component
+        {
+            self.EulerAngles(self.EulerAngles().Z(z));
+            return self;
+        }
     }
 }

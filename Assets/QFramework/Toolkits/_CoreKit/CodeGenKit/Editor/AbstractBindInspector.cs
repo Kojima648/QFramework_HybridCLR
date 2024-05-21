@@ -16,6 +16,7 @@ using Object = UnityEngine.Object;
 namespace QFramework
 {
     [CustomEditor(typeof(AbstractBind), true)]
+    [CanEditMultipleObjects]
     public class AbstractBindInspector : UnityEditor.Editor
     {
         private BindInspectorLocale mLocaleText = new BindInspectorLocale();

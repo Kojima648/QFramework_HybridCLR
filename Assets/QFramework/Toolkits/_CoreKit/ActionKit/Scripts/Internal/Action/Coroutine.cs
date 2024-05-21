@@ -1,7 +1,7 @@
 /****************************************************************************
- * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2015 - 2024 liangxiegame UNDER MIT License
  * 
- * http://qframework.cn
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
@@ -23,6 +23,7 @@ namespace QFramework
         public static CoroutineAction Allocate(Func<IEnumerator> coroutineGetter)
         {
             var coroutineAction = mPool.Allocate();
+            coroutineAction.ActionID = ActionKit.ID_GENERATOR++;
             coroutineAction.Deinited = false;
             coroutineAction.Reset();
             coroutineAction.mCoroutineGetter = coroutineGetter;
@@ -35,19 +36,20 @@ namespace QFramework
             if (!Deinited)
             {
                 Deinited = true;
-
                 mCoroutineGetter = null;
 
-                mPool.Recycle(this);
+                ActionQueue.AddCallback(new ActionQueueRecycleCallback<CoroutineAction>(mPool,this));
             }
         }
 
         public void Reset()
         {
+            Paused = false;
             Status = ActionStatus.NotStart;
         }
 
         public bool Deinited { get; set; }
+        public ulong ActionID { get; set; }
         public ActionStatus Status { get; set; }
         public void OnStart()
         {

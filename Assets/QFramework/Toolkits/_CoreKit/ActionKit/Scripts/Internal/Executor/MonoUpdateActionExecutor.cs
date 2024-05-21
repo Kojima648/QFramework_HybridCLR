@@ -1,48 +1,113 @@
 /****************************************************************************
- * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
- * 
- * http://qframework.cn
+ * Copyright (c) 2015 - 2024 liangxiegame UNDER MIT License
+ *
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace QFramework
 {
     internal class MonoUpdateActionExecutor : MonoBehaviour, IActionExecutor
     {
-        private Action mOnUpdate = () => { };
-        
-        public void Execute(IAction action,Action<IAction> onFinish = null)
+        public class ActionTask
         {
-            if (action.Status == ActionStatus.Finished) action.Reset();
-            if (this.UpdateAction(action, 0, onFinish)) return;
-
-            void OnUpdate()
-            {
-                if (this.UpdateAction(action,Time.deltaTime,onFinish))
-                {
-                    mOnUpdate -= OnUpdate;
-                }
-            }
-
-            mOnUpdate += OnUpdate;
+            public IAction Action;
+            public IActionController Controller;
+            public Action<IActionController> OnFinish;
         }
+
+        private List<ActionTask> mPrepareExecutionActions =
+            new List<ActionTask>();
+
+        private Dictionary<IAction, ActionTask> mExecutingActions =
+            new Dictionary<IAction, ActionTask>();
+
+        private static SimpleObjectPool<ActionTask> mActionTaskPool = new SimpleObjectPool<ActionTask>(
+            () => new ActionTask(), (task) =>
+            {
+                task.Action = null;
+                task.Controller = null;
+                task.OnFinish = null;
+            }, 50);
+
+        public void Execute(IActionController controller, Action<IActionController> onFinish = null)
+        {
+            if (controller.Action.Status == ActionStatus.Finished) controller.Action.Reset();
+            if (this.UpdateAction(controller, 0, onFinish)) return;
+
+            var actionTask = mActionTaskPool.Allocate();
+            actionTask.Action = controller.Action;
+            actionTask.Controller = controller;
+            actionTask.OnFinish = onFinish;
+            mPrepareExecutionActions.Add(actionTask);
+        }
+
+        private List<IAction> mToActionRemove = new List<IAction>();
 
         private void Update()
         {
-            mOnUpdate?.Invoke();
+            if (mPrepareExecutionActions.Count > 0)
+            {
+                foreach (var prepareExecutionAction in mPrepareExecutionActions)
+                {
+                    if (mExecutingActions.ContainsKey(prepareExecutionAction.Action))
+                    {
+                        mExecutingActions[prepareExecutionAction.Action] = prepareExecutionAction;
+                    }
+                    else
+                    {
+                        mExecutingActions.Add(prepareExecutionAction.Action, prepareExecutionAction);
+                    }
+                }
+
+                mPrepareExecutionActions.Clear();
+            }
+
+            foreach (var actionAndFinishCallback in mExecutingActions)
+            {
+                if (actionAndFinishCallback.Value.Controller.UpdateMode == ActionUpdateModes.ScaledDeltaTime)
+                {
+                    if (this.UpdateAction(actionAndFinishCallback.Value.Controller, Time.deltaTime,
+                            actionAndFinishCallback.Value.OnFinish))
+                    {
+                        mToActionRemove.Add(actionAndFinishCallback.Key);
+                    }
+                }
+                else if (actionAndFinishCallback.Value.Controller.UpdateMode == ActionUpdateModes.UnscaledDeltaTime)
+                {
+                    if (this.UpdateAction(actionAndFinishCallback.Value.Controller, Time.unscaledDeltaTime,
+                            actionAndFinishCallback.Value.OnFinish))
+                    {
+                        mToActionRemove.Add(actionAndFinishCallback.Key);
+                    }
+                }
+            }
+
+            if (mToActionRemove.Count > 0)
+            {
+                foreach (var action in mToActionRemove)
+                {
+                    mExecutingActions.Remove(action);
+                }
+
+                mToActionRemove.Clear();
+            }
         }
     }
 
     public static class MonoUpdateActionExecutorExtension
     {
-        public static IAction ExecuteByUpdate<T>(this T self, IAction action,Action<IAction> onFinish = null) where T : MonoBehaviour
+        public static IAction ExecuteByUpdate<T>(this T self, IAction action, IActionController controller,
+            Action<IActionController> onFinish = null)
+            where T : MonoBehaviour
         {
             if (action.Status == ActionStatus.Finished) action.Reset();
-            self.gameObject.GetOrAddComponent<MonoUpdateActionExecutor>().Execute(action,onFinish);
+            self.gameObject.GetOrAddComponent<MonoUpdateActionExecutor>().Execute(controller, onFinish);
             return action;
         }
     }

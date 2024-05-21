@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2015 ~ 2022 liangxiegame UNDER MIT LICENSE
+ * Copyright (c) 2015 ~ 2023 liangxiegame UNDER MIT LICENSE
  * 
  * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
@@ -68,10 +68,8 @@ namespace QFramework
             CurrentTask.Status = CodeGenTaskStatus.Search;
             BindSearchHelper.Search(task);
             CurrentTask.Status = CodeGenTaskStatus.Gen;
-
-
-            // var writer = File.CreateText(scriptFile);
-
+            var viewController = task.GameObject.GetComponent<ViewController>();
+            
             var writer = new StringBuilder();
             writer.AppendLine("using UnityEngine;");
             writer.AppendLine("using QFramework;");
@@ -86,8 +84,15 @@ namespace QFramework
             writer.AppendLine(
                 $"namespace {((string.IsNullOrWhiteSpace(task.Namespace)) ? CodeGenKit.Setting.Namespace : task.Namespace)}");
             writer.AppendLine("{");
-            writer.AppendLine($"\tpublic partial class {task.ClassName} : ViewController");
-            writer.AppendLine("\t{");
+            if (viewController.ViewControllerFullTypeName.IsNotNullAndEmpty())
+            {
+                writer.AppendLine(
+                    $"\tpublic partial class {task.ClassName} : {viewController.ViewControllerFullTypeName}");
+            }
+            else
+            {
+                writer.AppendLine($"\tpublic partial class {task.ClassName} : ViewController");
+            }            writer.AppendLine("\t{");
             writer.AppendLine("\t\tvoid Start()");
             writer.AppendLine("\t\t{");
             writer.AppendLine("\t\t\t// Code Here");
@@ -111,7 +116,14 @@ namespace QFramework
             writer.AppendLine(
                 $"namespace {(string.IsNullOrWhiteSpace(task.Namespace) ? CodeGenKit.Setting.Namespace : task.Namespace)}");
             writer.AppendLine("{");
-            writer.AppendLine($"\tpublic partial class {task.ClassName}");
+            if (viewController.ArchitectureFullTypeName.IsNotNullAndEmpty())
+            {
+                writer.AppendLine($"\tpublic partial class {task.ClassName} : QFramework.IController");
+            }
+            else
+            {
+                writer.AppendLine($"\tpublic partial class {task.ClassName}");
+            }
             writer.AppendLine("\t{");
 
             foreach (var bindData in task.BindInfos)
@@ -131,7 +143,22 @@ namespace QFramework
                 writer.AppendLine($"\t\tpublic {bindData.TypeName} {bindData.MemberName};");
             }
 
+            if (task.GameObject.GetComponent<OtherBinds>())
+            {
+                var referenceBinds = task.GameObject.GetComponent<OtherBinds>();
+                foreach (var referenceBind in referenceBinds.Binds)
+                {
+                    writer.AppendLine();
+                    writer.AppendLine($"\t\tpublic {referenceBind.Object.GetType().FullName} {referenceBind.MemberName};");
+                }
+            }
+
             writer.AppendLine();
+            if (viewController.ArchitectureFullTypeName.IsNotNullAndEmpty())
+            {
+                writer.AppendLine(
+                    $"\t\tQFramework.IArchitecture QFramework.IBelongToArchitecture.GetArchitecture()=>{viewController.ArchitectureFullTypeName}.Interface;");
+            }
             writer.AppendLine("\t}");
             writer.AppendLine("}");
             task.DesignerCode = writer.ToString();
@@ -180,8 +207,7 @@ namespace QFramework
                 Debug.Log(type);
 
                 var gameObject = CurrentTask.GameObject;
-
-
+                
                 var scriptComponent = gameObject.GetComponent(type);
 
                 if (!scriptComponent)
@@ -190,16 +216,30 @@ namespace QFramework
                 }
 
                 var serializedObject = new SerializedObject(scriptComponent);
-
-
+                
                 foreach (var bindInfo in CurrentTask.BindInfos)
                 {
                     var componentName = bindInfo.TypeName.Split('.').Last();
-                    serializedObject.FindProperty(bindInfo.MemberName).objectReferenceValue =
-                        gameObject.transform.Find(bindInfo.PathToRoot)
-                            .GetComponent(componentName);
+                    var serializedProperty = serializedObject.FindProperty(bindInfo.MemberName);
+                    var component = gameObject.transform.Find(bindInfo.PathToRoot).GetComponent(componentName);
+
+                    if (!component)
+                    {
+                        component = gameObject.transform.Find(bindInfo.PathToRoot).GetComponent(bindInfo.TypeName);
+                    }
+
+                    serializedProperty.objectReferenceValue = component;
                 }
 
+                var referenceBinds = gameObject.GetComponent<OtherBinds>();
+                if (referenceBinds)
+                {
+                    foreach (var bind in referenceBinds.Binds)
+                    {
+                        var serializedProperty = serializedObject.FindProperty(bind.MemberName);
+                        serializedProperty.objectReferenceValue = bind.Object;
+                    }
+                }
 
                 var codeGenerateInfo = gameObject.GetComponent<ViewController>();
 
@@ -210,37 +250,46 @@ namespace QFramework
                     serializedObject.FindProperty("GeneratePrefab").boolValue = codeGenerateInfo.GeneratePrefab;
                     serializedObject.FindProperty("ScriptName").stringValue = codeGenerateInfo.ScriptName;
                     serializedObject.FindProperty("Namespace").stringValue = codeGenerateInfo.Namespace;
-
+                    serializedObject.FindProperty("ArchitectureFullTypeName").stringValue = codeGenerateInfo.ArchitectureFullTypeName;
+                    
                     var generatePrefab = codeGenerateInfo.GeneratePrefab;
                     var prefabFolder = codeGenerateInfo.PrefabFolder;
 
-
                     if (codeGenerateInfo.GetType() != type)
                     {
-                        DestroyImmediate(codeGenerateInfo, false);
+                        DestroyImmediate(codeGenerateInfo, true);
                     }
 
-                    serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.UpdateIfRequiredOrScript();
 
                     if (generatePrefab)
                     {
                         prefabFolder.CreateDirIfNotExists();
 
-                        var generateFolder = prefabFolder + "/" + gameObject.name + ".prefab";
+                        var generatePrefabPath = prefabFolder + "/" + gameObject.name + ".prefab";
 
-                        Debug.Log(generateFolder);
-                        PrefabUtils.SaveAndConnect(generateFolder, gameObject);
+                        if (File.Exists(generatePrefabPath))
+                        { 
+                            // PrefabUtility.SavePrefabAsset(gameObject);
+                        }
+                        else
+                        {
+                            PrefabUtils.SaveAndConnect(generatePrefabPath, gameObject);
+                        }
                     }
                 }
                 else
                 {
                     serializedObject.FindProperty("ScriptsFolder").stringValue = "Assets/Scripts";
-                    serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.UpdateIfRequiredOrScript();
                 }
+                
+                EditorUtility.SetDirty(gameObject);
 
-                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-
-
+                // EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                
                 CurrentTask.Status = CodeGenTaskStatus.Complete;
                 CurrentTask = null;
             }

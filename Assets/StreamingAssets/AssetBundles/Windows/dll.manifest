@@ -1,0 +1,20 @@
+ManifestFileVersion: 0
+CRC: 3825414843
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: edc777cf102905d1bc1e0e4b1a231e5b
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/AssetRaw/DLL/mscorlib.dll.bytes
+- Assets/AssetRaw/DLL/System.Core.dll.bytes
+- Assets/AssetRaw/DLL/Assembly-CSharp.dll.bytes
+- Assets/AssetRaw/DLL/System.dll.bytes
+Dependencies: []

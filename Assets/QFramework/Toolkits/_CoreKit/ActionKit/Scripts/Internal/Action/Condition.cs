@@ -1,7 +1,7 @@
 /****************************************************************************
- * Copyright (c) 2015 - 2022 liangxiegame UNDER MIT License
+ * Copyright (c) 2015 - 2024 liangxiegame UNDER MIT License
  * 
- * http://qframework.cn
+ * https://qframework.cn
  * https://github.com/liangxiegame/QFramework
  * https://gitee.com/liangxiegame/QFramework
  ****************************************************************************/
@@ -22,6 +22,7 @@ namespace QFramework
         public static Condition Allocate(Func<bool> condition)
         {
             var conditionAction = mSimpleObjectPool.Allocate();
+            conditionAction.ActionID = ActionKit.ID_GENERATOR++;
             conditionAction.Deinited = false;
             conditionAction.Reset();
             conditionAction.mCondition = condition;
@@ -30,6 +31,7 @@ namespace QFramework
 
         public bool Paused { get; set; }
         public bool Deinited { get; set; }
+        public ulong ActionID { get; set; }
         public ActionStatus Status { get; set; }
         public void OnStart()
         {
@@ -53,12 +55,13 @@ namespace QFramework
             {
                 Deinited = true;
                 mCondition = null;
-                mSimpleObjectPool.Recycle(this);
+                ActionQueue.AddCallback(new ActionQueueRecycleCallback<Condition>(mSimpleObjectPool,this));
             }
         }
 
         public void Reset()
         {
+            Paused = false;
             Status = ActionStatus.NotStart;
         }
     }

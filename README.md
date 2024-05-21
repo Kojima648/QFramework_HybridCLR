@@ -1,19 +1,24 @@
-HybridCLR + QFramework 热更demo演示
+### HybridCLR + QFramework 热更demo演示
 
-QFramework:https://qframework.cn/
-HybridCLR(wolong):https://focus-creative-games.github.io/hybridclr/index/
-B站演示视频：https://www.bilibili.com/video/bv1VW4y1Y7Nh
+- QFramework:https://qframework.cn/
+- HybridCLR(wolong):https://hybridclr.doc.code-philosophy.com/docs/intro
+- B站演示视频：https://www.bilibili.com/video/bv1VW4y1Y7Nh
+- 目录下视频：Document\Demo.mp4
 
-视频演示了使用HybridCLR为QFramework的Example示例工程热更，对QF的打包做了一些修改，打包前先处理DLL相关的逻辑。
+#### 说明：
 
-UI和Game打入Prefabs这个AB包，热更的dll在AssetBundleSourceData/StandaloneWindows64 这个AB包，这两个都标记了文件夹
+1. 视频演示了使用HybridCLR为QFramework的Example（五子棋）示例工程热更。
+2. 对QF没有做任何修改，打包也是用的ResKit，仅仅是修改了DLL生成 加载相关的代码。
+3. 每次打AB（Patch 补丁）之前都要 Build代码，如果是出底包，则需要生成all，然后Build代码，再QF打包，DLL那个目录已经标记了
+4. 视频演示了通过Streamingasset 加载文件，每次替换改后的文件就可以。
+5. 没有做远端服务器更新，文件MD5对比之类的东西，如有需要，则自己实现。
+6. 编辑器下我是Win平台，直接用IO加载目录下的dll，真机模式则走的AB包里的DLL，其他平台没有做测试，如果有问题，自己微调一下。
+7. 这个项目，只是一个思路的演示，可能不能直接拿来用，请自己斟酌！
 
-真机模式和模拟模式都可以体验，观察game和ui的组件，都变白那就是AB，打包后测：直接从StreamingAssets复制新资源替换即可。
 
-对于DLL的处理用了HybridCLR原有的逻辑，ResKit打包前，DLL的文件夹已经被处理就绪。所以只需要标记。
 
-如果你拉取了工程，QFramework_HybridCLR\HybridCLRData\init_local_il2cpp_data.bat
+#### 更新日志
 
-这个bat的unity il2cpp路径改成你的，如果你是2020版本，那么需要改上面的分支为2020.3.33
+2022年8月10日，首次合并提交。
 
-分支和Unity版本需要统一，改完了重新运行下这个bat，有问题留言，如果有时间会完善这个demo
+2024年5月21日，第二次合并修改。
